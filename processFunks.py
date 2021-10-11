@@ -5,7 +5,12 @@ from random import choice
 import requests
 import pickle
 import pymorphy2
+import enchant
+from fuzzywuzzy import fuzz
+from enchant.checker import SpellChecker
 
+dictionary = enchant.Dict("ru_RU")
+checker = SpellChecker("ru_RU")
 morph = pymorphy2.MorphAnalyzer()
 db = sqlite3.connect('base.db')
 sql = db.cursor()
@@ -14,6 +19,26 @@ with open('res/classifiers/main.pickle', 'rb') as f:
     cl = pickle.load(f)
 sql.execute(f"""SELECT genre FROM music""")
 music_genres = list(set([str(i)[2:-3].lower() for i in sql.fetchall()]))
+
+
+def correction_word(word):
+    res = word
+    if not dictionary.check(word):
+        m = 0
+        for i in dictionary.suggest(word):
+            p = fuzz.ratio(i, word)
+            if p >= m and len(word) == len(i):
+                m = p
+                res = i
+    return res
+
+
+def correction_sentence(text):
+    checker.set_text(text)
+    uncorect = [i.word for i in checker]
+    for i in uncorect:
+        text = text.replace(i, correction_word(i))
+    return text
 
 
 def transliteration(text):
