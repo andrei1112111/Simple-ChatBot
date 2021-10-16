@@ -208,3 +208,4 @@ def return_answer(text):
     elif 'музыка' in res:
         return 'music'
     return res
+
