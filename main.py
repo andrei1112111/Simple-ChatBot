@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QApplication, QDialog
 from processFunks import *
 from loading import Ui_LoadWindow
@@ -38,6 +39,7 @@ class MainWindow(QDialog, Ui_MainWindow):
 
     def send_message(self, text):
         self.blue_message(text_progress(text))
+        text = normalize_text(text)
         res = return_answer(text)  # Обработка естественного языка
         if 'music' in res:
             self.check(401)
@@ -120,7 +122,10 @@ class MainWindow(QDialog, Ui_MainWindow):
                 i.hide()
             self.media_player.stop()
             if self.timer:
-                self.musicTimer.disconnect()
+                try:
+                    self.musicTimer.disconnect()
+                except Exception:
+                    pass
 
     def run_anim1(self, num):  # Анимация кнопки
         if num[1]:

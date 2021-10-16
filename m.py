@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtCore import QUrl
@@ -149,8 +150,8 @@ class Ui_MainWindow(object):
         self.labl1red = QtWidgets.QLabel(self.centralwidget)
         self.labl1red.setGeometry(QtCore.QRect(20, 160, 111, 51))
         font = QtGui.QFont()
-        font.setFamily("System")
-        font.setPointSize(10)
+        font.setFamily("Arial")
+        font.setPointSize(11)
         font.setBold(True)
         font.setItalic(False)
         font.setUnderline(False)
@@ -167,8 +168,8 @@ class Ui_MainWindow(object):
         self.labl2red = QtWidgets.QLabel(self.centralwidget)
         self.labl2red.setGeometry(QtCore.QRect(20, 240, 111, 51))
         font = QtGui.QFont()
-        font.setFamily("Corbel")
-        font.setPointSize(12)
+        font.setFamily("Arial")
+        font.setPointSize(11)
         font.setBold(True)
         font.setItalic(False)
         font.setUnderline(False)
@@ -185,8 +186,8 @@ class Ui_MainWindow(object):
         self.labl0red = QtWidgets.QLabel(self.centralwidget)
         self.labl0red.setGeometry(QtCore.QRect(20, 80, 111, 51))
         font = QtGui.QFont()
-        font.setFamily("Corbel")
-        font.setPointSize(12)
+        font.setFamily("Arial")
+        font.setPointSize(11)
         font.setBold(True)
         font.setItalic(False)
         font.setUnderline(False)
@@ -203,8 +204,8 @@ class Ui_MainWindow(object):
         self.labl3red = QtWidgets.QLabel(self.centralwidget)
         self.labl3red.setGeometry(QtCore.QRect(20, 160, 111, 51))
         font = QtGui.QFont()
-        font.setFamily("System")
-        font.setPointSize(10)
+        font.setFamily("Arial")
+        font.setPointSize(11)
         font.setBold(True)
         font.setItalic(False)
         font.setUnderline(False)
@@ -355,7 +356,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowIcon(QtGui.QIcon('res/LOGO.jpg'))
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Ассистент"))
 
 
 if __name__ == "__main__":

@@ -1,28 +1,52 @@
-from textblob.classifiers import NaiveBayesClassifier
-import pickle
+# -*- coding: utf-8 -*-
+from fuzzywuzzy.process import extract as find
 
-data = [
-    ('', ''),
-    ('погода', 'weather'),
-    ('погода на завтра', 'weather@1'),
-    ('погода в', 'weather@city'),
-    ('погода на завтра в', 'weather@1@city'),
-    ('погода на сегодня', 'weather'),
-    ('погода на сегодня в', 'weather@city'),
-    ('погода в на завтра', 'weather@1@city'),
-    ('музыка', 'music'),
-    ('включи музыку', 'music'),
-    ('включи рок', 'music'),
-    ('проиграй рок', 'music'),
-    ('включи рок музыку', 'music'),
-    ('привет', 'hi'),
-    ('здравствуй', 'hi'),
-    ('доброе утро', 'hi@0'),
-    ('добрый день', 'hi@1'),
-    ('добрый вечер', 'hi@2'),
-    ('доброй ночи', 'hi@3')
-]
-cl = NaiveBayesClassifier(data)
+music = [{
+    'text': [
+        'музыка',
+        'включи музыку'
+    ],
+    'label': 'музыка'
+}]
 
-with open('main.pickle', 'wb') as f:
-    pickle.dump(cl, f)
+weather = [{
+    'text': [
+        'погода',
+        'погода на сегодня'
+    ],
+    'label': 'погода'
+}, {
+    'text': [
+        'погода на завтра'
+    ],
+    'label': 'погода на завтра'
+}, {
+    'text': [
+        'погода в ',
+        'погода на сегодня в ',
+        'погода в на'
+    ],
+    'label': 'погода в городе'
+}, {
+    'text': [
+        'погода на завтра в ',
+        'погода в коробке на завтра'
+    ],
+    'label': 'погода в городе на завтра'
+}]
+intents = [music, weather]
+
+
+def classify(text):
+    res = []
+    for intent in intents:
+        for unit in intent:
+            res.append((find(text, [i for i in unit['text'] if
+                                    len(i.split()) == len(text.split()) or len(i.split()) + 1 == len(text.split()) or len(
+                                        i.split()) - 1 == len(text.split())], limit=1), unit['label']))
+
+    print(res)
+    res = [i for i in res if i[0] != []]
+    res = max(res, key=lambda x: x[0][0][1])
+    res = res[1] if int(res[0][0][1]) >= 70 else 'False'
+    return res

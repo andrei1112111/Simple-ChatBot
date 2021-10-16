@@ -1,44 +1,20 @@
+# -*- coding: utf-8 -*-
+from res.classifiers.MainCl import classify
 from PyQt5 import QtCore
 from time import sleep
 import sqlite3
 from random import choice
 import requests
-import pickle
 import pymorphy2
-import enchant
-from fuzzywuzzy import fuzz
-from enchant.checker import SpellChecker
+import subprocess
+from res.classifiers.talk import pipe
 
-dictionary = enchant.Dict("ru_RU")
-checker = SpellChecker("ru_RU")
 morph = pymorphy2.MorphAnalyzer()
 db = sqlite3.connect('base.db')
 sql = db.cursor()
 last_song = None
-with open('res/classifiers/main.pickle', 'rb') as f:
-    cl = pickle.load(f)
 sql.execute(f"""SELECT genre FROM music""")
 music_genres = list(set([str(i)[2:-3].lower() for i in sql.fetchall()]))
-
-
-def correction_word(word):
-    res = word
-    if not dictionary.check(word):
-        m = 0
-        for i in dictionary.suggest(word):
-            p = fuzz.ratio(i, word)
-            if p >= m and len(word) == len(i):
-                m = p
-                res = i
-    return res
-
-
-def correction_sentence(text):
-    checker.set_text(text)
-    uncorect = [i.word for i in checker]
-    for i in uncorect:
-        text = text.replace(i, correction_word(i))
-    return text
 
 
 def transliteration(text):
@@ -194,24 +170,41 @@ def get_weather(date=0, s_city="barnaul"):
     return s[date].strip(), se
 
 
+def normalize_text(text):
+    if 'FakeDictionary' in str(morph.parse(text.split()[0])[0].methods_stack):
+        return 'False'
+    elif str(morph.parse(text.split()[0])[0].tag) == 'LATN':
+        return 'Latin'
+    print(str(morph.parse(text.split()[0])[0].tag))
+    command = f'pyaspeller "{text}"'
+    res = subprocess.check_output(command)
+    return res.decode('cp1251').strip()
+
+
 def return_answer(text):
     """
     Создание ответа
     :param text:
     :return text:
     """
-    prob_dist = cl.prob_classify(text)
-    print(prob_dist.max())
-    res = prob_dist.max()
-    if round(prob_dist.prob(prob_dist.max()), 2) >= 0.7:
-        if 'weather' in res:
-            city = 'barnaul'
-            if 'city' in res:
-                city = str(text).split(' в ')[-1].split()[0]
-                city = morph.parse(city)[0].normal_form
-                city = transliteration(city)
-            time = 1 if '1' in res else 0
-            return f'weather!{time}!{city}'
-        elif 'music' in res:
-            return 'music'
-    return 'lol'
+    if text == 'False':
+        return 'я вас не понял'
+    elif text == 'Latin':
+        return 'я знаю только русский язык'
+
+    res = classify(text)
+    print(res)
+    if res == 'False':
+        res = pipe.predict([text])[0]
+    elif 'погода' in res:
+        print(1)
+        city = 'barnaul'
+        if 'в городе' in res:
+            city = str(text).split(' в ')[-1].split()[0]
+            city = morph.parse(city)[0].normal_form
+            city = transliteration(city)
+        time = 1 if '1' in res else 0
+        return f'weather!{time}!{city}'
+    elif 'музыка' in res:
+        return 'music'
+    return res
